@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dummy
+  namespace: kuard
+spec:
+  type: NodePort
+  selector:
+    name: dummy
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080

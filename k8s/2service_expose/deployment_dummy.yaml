@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dummy
+  namespace: kuard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: dummy
+  template:
+    metadata:
+      labels:
+        name: dummy
+    spec:
+      containers:
+      - name: dummy
+        image: gcr.io/google-samples/hello-app:1.0
+        ports:
+        - containerPort: 8080

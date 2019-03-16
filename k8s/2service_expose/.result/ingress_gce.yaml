@@ -1,0 +1,15 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: "weekend"
+  name: kuard-ingress
+  namespace: kuard
+spec:
+  rules:
+  - host: kuard.35.201.76.150.nip.io
+    http:
+      paths:
+      - backend:
+          serviceName: kuard
+          servicePort: 80

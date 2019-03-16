@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kuard
+  namespace: kuard
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      name: kuard
+  template:
+    metadata:
+      labels:
+        name: kuard
+    spec:
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: kuard
+        image: gcr.io/kuar-demo/kuard-amd64:blue
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "200m"
+          limits:
+            memory: "256Mi"
+            cpu: "300m"
+        env:
+        - name: CW_GREETING
+          value: "Hello from the environment"
+        - name: CW_MY_POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        envFrom:
+        - configMapRef:
+            name: kuard
+        - secretRef:
+            name: kuard-secret
+        ports:
+        - containerPort: 8080
+      # Pod must be ready, before Kubernetes start sending traffic to it
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          # Check is done every 2 seconds starting as soon as the pod comes up
+          periodSeconds: 2
+          # Start checking once pod is up
+          initialDelaySeconds: 2
+          # If three successive checks fail, then the pod will be considered not ready.
+          failureThreshold: 3
+          # If only one check succeeds, then the pod will again be considered ready.
+          successThreshold: 1
+        livenessProbe:
+          httpGet:
+            path: /healthy
+            port: 8080
+          # Start probe 5 seconds after all the containers in the Pod are created
+          initialDelaySeconds: 5
+          # The response must be max in 1 second and status HTTP code must be between 200 and 400
+          timeoutSeconds: 1
+          # Repeat every 10 seconds
+          periodSeconds: 10
+          # If more than 3 probes failed - the container will fail + restart
+          failureThreshold: 3
